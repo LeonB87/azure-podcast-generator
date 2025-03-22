@@ -83,6 +83,13 @@ with form_container.expander("Advanced options", expanded=False):
         else 1,
     )
 
+    # Target Audience of the podcast
+    target_audience = st.text_input(
+        "Target Audience",
+        value="The general public",
+        help="Describe the target audience of the podcast this tailors the generated podcast. Examples: The General Public, Subject Matter Experts, Cloud Consultants, Kids, CEOs, Freelancers etc.",
+    )
+
     # Max tokens slider
     max_tokens = st.slider(
         "Max Tokens",
@@ -126,7 +133,7 @@ if uploaded_file and generate_podcast:
             )
 
         status.update(
-            label="Analyzing document and generating podcast script with Azure OpenAI...",
+            label=f"Analyzing document and generating podcast script with Azure OpenAI targeting {target_audience} ...",
             state="running",
             expanded=False,
         )
@@ -141,6 +148,7 @@ if uploaded_file and generate_podcast:
             voice_1=voice_1,
             voice_2=voice_2,
             max_tokens=max_tokens,
+            target_audience=target_audience,
         )
 
         podcast_script = podcast_response.podcast["script"]
@@ -153,57 +161,57 @@ if uploaded_file and generate_podcast:
             expanded=False,
         )
 
-        # Convert podcast script to audio
-        ssml = podcast_script_to_ssml(podcast_response.podcast)
-        audio = text_to_speech(ssml)
+        # # Convert podcast script to audio
+        # ssml = podcast_script_to_ssml(podcast_response.podcast)
+        # audio = text_to_speech(ssml)
 
-        status.update(
-            label="Calculate Azure costs...",
-            state="running",
-            expanded=False,
-        )
+        # status.update(
+        #     label="Calculate Azure costs...",
+        #     state="running",
+        #     expanded=False,
+        # )
 
-        # Calculate costs
-        azure_document_intelligence_costs = calculate_azure_document_intelligence_costs(
-            pages=document_response.pages
-        )
-        azure_openai_costs = calculate_azure_openai_costs(
-            input_tokens=podcast_response.usage.prompt_tokens,
-            output_tokens=podcast_response.usage.completion_tokens,
-        )
+        # # Calculate costs
+        # azure_document_intelligence_costs = calculate_azure_document_intelligence_costs(
+        #     pages=document_response.pages
+        # )
+        # azure_openai_costs = calculate_azure_openai_costs(
+        #     input_tokens=podcast_response.usage.prompt_tokens,
+        #     output_tokens=podcast_response.usage.completion_tokens,
+        # )
 
-        azure_ai_speech_costs = calculate_azure_ai_speech_costs(
-            characters=sum(len(item["message"]) for item in podcast_script)
-        )
+        # azure_ai_speech_costs = calculate_azure_ai_speech_costs(
+        #     characters=sum(len(item["message"]) for item in podcast_script)
+        # )
 
-        status.update(label="Finished", state="complete", expanded=False)
-        final_audio = True
+        # status.update(label="Finished", state="complete", expanded=False)
+        # final_audio = True
 
 
 # Display audio player after generation
-if final_audio:
-    status_container.empty()
+# if final_audio:
+#     status_container.empty()
 
-    # Create three tabs
-    audio_tab, transcript_tab, costs_tab = st.tabs(["Audio", "Transcript", "Costs"])
+#     # Create three tabs
+#     audio_tab, transcript_tab, costs_tab = st.tabs(["Audio", "Transcript", "Costs"])
 
-    with audio_tab:
-        st.audio(audio, format="audio/wav")
+#     with audio_tab:
+#         st.audio(audio, format="audio/wav")
 
-    with transcript_tab:
-        podcast_script = podcast_response.podcast["script"]
-        for item in podcast_script:
-            st.markdown(f"**{item['name']}**: {item['message']}")
+#     with transcript_tab:
+#         podcast_script = podcast_response.podcast["script"]
+#         for item in podcast_script:
+#             st.markdown(f"**{item['name']}**: {item['message']}")
 
-    with costs_tab:
-        st.markdown(
-            f"**Azure: Document Intelligence**: ${azure_document_intelligence_costs:.2f}"
-        )
-        st.markdown(f"**Azure OpenAI Service**: ${azure_openai_costs:.2f}")
-        st.markdown(f"**Azure AI Speech**: ${azure_ai_speech_costs:.2f}")
-        st.markdown(
-            f"**Total costs**: ${(azure_ai_speech_costs + azure_openai_costs + azure_document_intelligence_costs):.2f}"
-        )
+#     with costs_tab:
+#         st.markdown(
+#             f"**Azure: Document Intelligence**: ${azure_document_intelligence_costs:.2f}"
+#         )
+#         st.markdown(f"**Azure OpenAI Service**: ${azure_openai_costs:.2f}")
+#         st.markdown(f"**Azure AI Speech**: ${azure_ai_speech_costs:.2f}")
+#         st.markdown(
+#             f"**Total costs**: ${(azure_ai_speech_costs + azure_openai_costs + azure_document_intelligence_costs):.2f}"
+#         )
 
 # Footer
 st.divider()

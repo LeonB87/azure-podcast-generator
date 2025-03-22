@@ -29,6 +29,8 @@ Create a highly engaging podcast script between two people based on the input te
 
 - A conversational podcast script in structured JSON.
 - Include informal expressions and pauses.
+- Specifically tailor the podcast for {target_audience}.
+- If the target audience is in a leadership or governing role, include the oppurtunities and dangerss it might have on their company and the people they are responsible for.
 - Clearly mark speaker turns.
 - Name the hosts {voice_1} and {voice_2}.
 
@@ -104,6 +106,7 @@ def document_to_podcast_script(
     voice_1: str = "Andrew",
     voice_2: str = "Emma",
     max_tokens: int = 8000,
+    target_audience: str = "The general public",
 ) -> PodcastScriptResponse:
     """Get LLM response."""
 
@@ -125,7 +128,7 @@ def document_to_podcast_script(
         messages=[
             {
                 "role": "system",
-                "content": PROMPT.format(voice_1=voice_1, voice_2=voice_2),
+                "content": PROMPT.format(voice_1=voice_1, voice_2=voice_2, target_audience=target_audience),
             },
             # Wrap the document in <documents> tag for Prompt Shield Indirect attacks
             # https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter?tabs=warning%2Cindirect%2Cpython-new#embedding-documents-in-your-prompt
